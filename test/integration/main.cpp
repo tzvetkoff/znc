@@ -1937,4 +1937,21 @@ TEST_F(ZNCTest, AutoAttachModule) {
     Z;
 }
 
+TEST_F(ZNCTest, ModuleCSRFOverride) {
+    auto znc = Run();
+    Z;
+    auto ircd = ConnectIRCd();
+    Z;
+    auto client = LoginClient();
+    Z;
+    client.Write("znc loadmod samplewebapi");
+    Z;
+    auto request = QNetworkRequest(QUrl("http://127.0.0.1:12345/mods/global/samplewebapi/"));
+    auto reply = HttpPost(request, {
+        {"text", "ipsum"}
+    })->readAll().toStdString();
+    Z;
+    EXPECT_THAT(reply, HasSubstr("ipsum"));
+}
+
 }  // namespace
